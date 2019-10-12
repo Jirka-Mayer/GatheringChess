@@ -7,7 +7,8 @@
 
 # JetBrains Rider plugin
 [Aa]ssets/Plugins/
-[Aa]ssets/Plugins.meta
+
+# meta files are OK, they should be tracked
 
 #########################
 # Unity gitignore rules #
