@@ -31,6 +31,11 @@ namespace GatheringChess
                               "<b>Gems:</b> " + playerEntity.Gems;
         }
 
+        public void OpenMyCollection()
+        {
+            SceneManager.LoadScene("Collection");
+        }
+
         public void Logout()
         {
             Auth.Logout().Then(() => {

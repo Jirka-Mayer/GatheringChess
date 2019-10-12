@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/GatheringChess/Scenes/MainMenu.unity
     guid: aa7948df35f07155b8fe9c12f0ee6e8e
+  - enabled: 1
+    path: Assets/GatheringChess/Scenes/Collection.unity
+    guid: 2ae73ddc6bd43461b95d00a743e3e5ff
   m_configObjects: {}

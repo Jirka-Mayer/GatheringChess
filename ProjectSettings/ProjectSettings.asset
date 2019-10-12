@@ -680,10 +680,10 @@ PlayerSettings:
   facebookXfbml: 0
   facebookFrictionlessRequests: 1
   apiCompatibilityLevel: 6
-  cloudProjectId: 
+  cloudProjectId: a366d942-85ca-4476-bbb4-20459e972d4a
   framebufferDepthMemorylessMode: 0
-  projectName: 
-  organizationId: 
+  projectName: GatheringChess
+  organizationId: jirkamayer97
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0
   disableOldInputManagerSupport: 0

@@ -14,5 +14,20 @@ namespace GatheringChess.Facets
         {
             return GetEntity<PlayerCollectionEntity>.OfPlayer(Caller).First();
         }
+
+        public PlayerEntity PlayerHasBoughtSmallGems(string receiptId)
+        {
+            var entity = GetPlayerEntity();
+            
+            // do some verification here
+
+            DB.Transaction(() => {
+                entity.RefreshAndLockForUpdate();
+                entity.Gems += 100;
+                entity.Save();
+            });
+
+            return entity;
+        }
     }
 }
