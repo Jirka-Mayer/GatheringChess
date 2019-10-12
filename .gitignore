@@ -5,6 +5,10 @@
 # Unisave asset doesn't need to be saved
 [Aa]ssets/Unisave/
 
+# JetBrains Rider plugin
+[Aa]ssets/Plugins/
+[Aa]ssets/Plugins.meta
+
 #########################
 # Unity gitignore rules #
 #########################

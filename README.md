@@ -48,8 +48,15 @@ Simple chess game that I'm building to demonstrate features of Unisave.
 
 ### UI structure
 
-- main menu (launch screen)
-    - account management (icon in left upper corner)
+- login (launch screen)
+    - login
+    - register
+    - create anonymous player
+    - manage remembered accounts
+    - practise offline button
+
+- main menu
+    - logout
     - coins and gems counter
     - nickname + avatar display (+ click to modify)
         - screen where you can modify this (modal or sth...)
@@ -58,4 +65,3 @@ Simple chess game that I'm building to demonstrate features of Unisave.
         - play button
     - my collection button
         - buy gems / booster packs
-    - practise offline button

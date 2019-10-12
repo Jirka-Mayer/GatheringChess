@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/GatheringChess/Scenes/Login.unity
+    guid: 7f7cfb13037d4bf02a9b8fc454aed777
+  - enabled: 1
     path: Assets/GatheringChess/Scenes/MainMenu.unity
     guid: aa7948df35f07155b8fe9c12f0ee6e8e
   m_configObjects: {}
