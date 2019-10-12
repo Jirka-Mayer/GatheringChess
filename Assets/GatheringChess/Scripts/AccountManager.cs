@@ -146,6 +146,12 @@ namespace GatheringChess
         /// </summary>
         public void SetPrimaryAccount(Account account)
         {
+            if (account == null)
+            {
+                PrimaryAccount = null;
+                return;
+            }
+            
             if (!accounts.Contains(account))
                 throw new ArgumentException(
                     "Account is not known by the manager"

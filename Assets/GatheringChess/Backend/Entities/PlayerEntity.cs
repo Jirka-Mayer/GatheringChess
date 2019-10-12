@@ -19,5 +19,15 @@ namespace GatheringChess.Entities
         /// ID of the selected avatar image
         /// </summary>
         [X] public string AvatarId { get; set; }
+        
+        /// <summary>
+        /// Amount of coins
+        /// </summary>
+        [X] public int Coins { get; set; }
+        
+        /// <summary>
+        /// Amount of gems
+        /// </summary>
+        [X] public int Gems { get; set; }
     }
 }
