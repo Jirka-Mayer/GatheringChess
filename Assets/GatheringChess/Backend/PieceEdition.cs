@@ -6,6 +6,9 @@ namespace GatheringChess
     public enum PieceEdition
     {
         // given to each new player
-        Default = 0
+        Default = 0,
+        
+        // style of the wikipedia chess pieces
+        Wikipedia = 1,
     }
 }

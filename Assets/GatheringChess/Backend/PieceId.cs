@@ -21,14 +21,14 @@ namespace GatheringChess
                         PieceId id = (PieceId)obj;
                         return new JsonObject()
                             .Add("type", Serializer.ToJson(id.type))
-                            .Add("edition", Serializer.ToJson(id.edition))
-                            .Add("color", Serializer.ToJson(id.color));
+                            .Add("color", Serializer.ToJson(id.color))
+                            .Add("edition", Serializer.ToJson(id.edition));
                     })
                     .FromJson((json, type) => {
                         return new PieceId(
                             Serializer.FromJson<PieceType>(json["type"]),
-                            Serializer.FromJson<PieceEdition>(json["edition"]),
-                            Serializer.FromJson<PieceColor>(json["color"])
+                            Serializer.FromJson<PieceColor>(json["color"]),
+                            Serializer.FromJson<PieceEdition>(json["edition"])
                         );
                     })
             );
@@ -37,8 +37,8 @@ namespace GatheringChess
         public readonly PieceType type;
         public readonly PieceEdition edition;
         public readonly PieceColor color;
-
-        public PieceId(PieceType type, PieceEdition edition, PieceColor color)
+        
+        public PieceId(PieceType type, PieceColor color, PieceEdition edition)
         {
             this.type = type;
             this.edition = edition;
