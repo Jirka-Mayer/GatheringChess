@@ -8,7 +8,6 @@ namespace GatheringChess
         // given to each new player
         Default = 0,
         
-        // style of the wikipedia chess pieces
-        Wikipedia = 1,
+        ManRay = 1
     }
 }

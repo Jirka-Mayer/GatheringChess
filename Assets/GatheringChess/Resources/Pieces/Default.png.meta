@@ -2,18 +2,18 @@ fileFormatVersion: 2
 guid: c26f90e3b07be7c56b8a7def70dbb309
 TextureImporter:
   fileIDToRecycleName:
-    21300000: pieces_0
-    21300002: pieces_1
-    21300004: pieces_2
-    21300006: pieces_3
-    21300008: pieces_4
-    21300010: pieces_5
-    21300012: pieces_6
-    21300014: pieces_7
-    21300016: pieces_8
-    21300018: pieces_9
-    21300020: pieces_10
-    21300022: pieces_11
+    21300000: WK
+    21300002: WQ
+    21300004: WB
+    21300006: WN
+    21300008: WR
+    21300010: WP
+    21300012: BK
+    21300014: BQ
+    21300016: BB
+    21300018: BN
+    21300020: BR
+    21300022: BP
   externalObjects: {}
   serializedVersion: 9
   mipmaps:
@@ -118,7 +118,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: pieces_0
+      name: WK
       rect:
         serializedVersion: 2
         x: 0
@@ -126,7 +126,7 @@ TextureImporter:
         width: 213.33333
         height: 213.5
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -138,7 +138,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pieces_1
+      name: WQ
       rect:
         serializedVersion: 2
         x: 213
@@ -146,7 +146,7 @@ TextureImporter:
         width: 213.33333
         height: 213.5
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -158,7 +158,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pieces_2
+      name: WB
       rect:
         serializedVersion: 2
         x: 426
@@ -166,7 +166,7 @@ TextureImporter:
         width: 213.33333
         height: 213.5
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -178,7 +178,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pieces_3
+      name: WN
       rect:
         serializedVersion: 2
         x: 639
@@ -186,7 +186,7 @@ TextureImporter:
         width: 213.33333
         height: 213.5
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -198,7 +198,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pieces_4
+      name: WR
       rect:
         serializedVersion: 2
         x: 852
@@ -206,7 +206,7 @@ TextureImporter:
         width: 213.33333
         height: 213.5
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -218,7 +218,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pieces_5
+      name: WP
       rect:
         serializedVersion: 2
         x: 1065
@@ -226,7 +226,7 @@ TextureImporter:
         width: 213.33333
         height: 213.5
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -238,7 +238,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pieces_6
+      name: BK
       rect:
         serializedVersion: 2
         x: 0
@@ -246,7 +246,7 @@ TextureImporter:
         width: 213.33333
         height: 213.5
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -258,7 +258,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pieces_7
+      name: BQ
       rect:
         serializedVersion: 2
         x: 213
@@ -266,7 +266,7 @@ TextureImporter:
         width: 213.33333
         height: 213.5
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -278,15 +278,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pieces_8
+      name: BB
       rect:
         serializedVersion: 2
-        x: 426
-        y: 0.5
-        width: 213.33333
-        height: 213.5
+        x: 424
+        y: 1
+        width: 213
+        height: 214
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -298,7 +298,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pieces_9
+      name: BN
       rect:
         serializedVersion: 2
         x: 639
@@ -306,7 +306,7 @@ TextureImporter:
         width: 213.33333
         height: 213.5
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -318,7 +318,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pieces_10
+      name: BR
       rect:
         serializedVersion: 2
         x: 852
@@ -326,7 +326,7 @@ TextureImporter:
         width: 213.33333
         height: 213.5
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -338,7 +338,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pieces_11
+      name: BP
       rect:
         serializedVersion: 2
         x: 1065
@@ -346,7 +346,7 @@ TextureImporter:
         width: 213.33333
         height: 213.5
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []

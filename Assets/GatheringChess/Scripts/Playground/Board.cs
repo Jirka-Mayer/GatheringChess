@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -30,23 +31,13 @@ namespace GatheringChess.Playground
 
         private Action<ChessMove> onPlayerMoveDone;
 
-        async void Start()
-        {
-            // DEBUG
-            CreateBoard(true);
-
-            await LetPlayerHaveAMove();
-            
-            PerformOpponentsMove(
-                new Vector2Int(7, 7),
-                new Vector2Int(5, 5)
-            );
-        }
+        public Piece this[int x, int y]
+            => pieces.FirstOrDefault(p => p.Coordinates.x == x && p.Coordinates.y == y);
 
         /// <summary>
         /// Call this before using the chess board
         /// </summary>
-        public void CreateBoard(bool isPlayerWhite)
+        public void CreateBoard(bool isPlayerWhite, ChessHalfSet whiteSet, ChessHalfSet blackSet)
         {
             this.isPlayerWhite = isPlayerWhite;
 
@@ -87,32 +78,32 @@ namespace GatheringChess.Playground
 
             // white
             for (int i = 0; i < BoardSize; i++)
-                CreatePiece(i, 1, PieceType.Pawn, true);
+                CreatePiece(i, 1, whiteSet.pawns[i]);
         
-            CreatePiece(0, 0, PieceType.Rook, true);
-            CreatePiece(1, 0, PieceType.Knight, true);
-            CreatePiece(2, 0, PieceType.Bishop, true);
-            CreatePiece(3, 0, PieceType.Queen, true);
-            CreatePiece(4, 0, PieceType.King, true);
-            CreatePiece(5, 0, PieceType.Bishop, true);
-            CreatePiece(6, 0, PieceType.Knight, true);
-            CreatePiece(7, 0, PieceType.Rook, true);
+            CreatePiece(0, 0, whiteSet.leftRook);
+            CreatePiece(1, 0, whiteSet.leftKnight);
+            CreatePiece(2, 0, whiteSet.leftBishop);
+            CreatePiece(3, 0, whiteSet.queen);
+            CreatePiece(4, 0, whiteSet.king);
+            CreatePiece(5, 0, whiteSet.rightBishop);
+            CreatePiece(6, 0, whiteSet.rightKnight);
+            CreatePiece(7, 0, whiteSet.rightRook);
 
             // black
             for (int i = 0; i < BoardSize; i++)
-                CreatePiece(i, 6, PieceType.Pawn, false);
+                CreatePiece(i, 6, blackSet.pawns[i]);
         
-            CreatePiece(0, 7, PieceType.Rook, false);
-            CreatePiece(1, 7, PieceType.Knight, false);
-            CreatePiece(2, 7, PieceType.Bishop, false);
-            CreatePiece(3, 7, PieceType.Queen, false);
-            CreatePiece(4, 7, PieceType.King, false);
-            CreatePiece(5, 7, PieceType.Bishop, false);
-            CreatePiece(6, 7, PieceType.Knight, false);
-            CreatePiece(7, 7, PieceType.Rook, false);
+            CreatePiece(0, 7, blackSet.leftRook);
+            CreatePiece(1, 7, blackSet.leftKnight);
+            CreatePiece(2, 7, blackSet.leftBishop);
+            CreatePiece(3, 7, blackSet.queen);
+            CreatePiece(4, 7, blackSet.king);
+            CreatePiece(5, 7, blackSet.rightBishop);
+            CreatePiece(6, 7, blackSet.rightKnight);
+            CreatePiece(7, 7, blackSet.rightRook);
         }
 
-        private void CreatePiece(int x, int y, PieceType type, bool isWhite)
+        private void CreatePiece(int x, int y, PieceId pieceId)
         {
             var go = Instantiate(
                 piecePrefab,
@@ -123,11 +114,7 @@ namespace GatheringChess.Playground
             go.transform.rotation = Quaternion.identity;
 
             var piece = go.GetComponent<Piece>();
-            piece.Id = new PieceId(
-                type,
-                isWhite ? PieceColor.White : PieceColor.Black,
-                PieceEdition.Default
-            );
+            piece.Id = pieceId;
             piece.MovePieceTo(x, y, false);
 
             pieces.Add(piece);
@@ -170,12 +157,10 @@ namespace GatheringChess.Playground
             pieceToMove.MovePieceTo(tile.Coordinates.x, tile.Coordinates.y, true);
 
             // player move is done
-            if (onPlayerMoveDone != null)
-                onPlayerMoveDone.Invoke(new ChessMove {
-                    @from = from,
-                    to = tile.Coordinates
-                });
-            onPlayerMoveDone = null;
+            onPlayerMoveDone?.Invoke(new ChessMove {
+                from = from,
+                to = tile.Coordinates
+            });
         }
 
         private void ActivatePiece(Piece piece)
@@ -225,6 +210,7 @@ namespace GatheringChess.Playground
 
             onPlayerMoveDone += (move) => {
                 playersTurn = false;
+                onPlayerMoveDone = null;
                 promise.SetResult(move);
             };
 

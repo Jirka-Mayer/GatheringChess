@@ -1,14 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using LightJson;
 using Unisave.Serialization;
+using UnityEngine;
 
 namespace GatheringChess
 {
     /// <summary>
     /// ID of a single chess piece that can be owned by a player
     /// </summary>
-    public struct PieceId : IEquatable<PieceId>
+    public class PieceId : IEquatable<PieceId>
     {
         static PieceId()
         {
@@ -38,16 +40,30 @@ namespace GatheringChess
         public readonly PieceEdition edition;
         public readonly PieceColor color;
         
+        /// <summary>
+        /// Default piece to use instead of null
+        /// </summary>
+        public static readonly PieceId Default = new PieceId(
+            default(PieceType), default(PieceColor), default(PieceEdition)
+        );
+        
         public PieceId(PieceType type, PieceColor color, PieceEdition edition)
         {
             this.type = type;
             this.edition = edition;
             this.color = color;
         }
+
+        public Sprite LoadSprite()
+        {
+            Sprite[] atlas = Resources.LoadAll<Sprite>($"Pieces/{edition}");
+            string name = "" + color.GetLetter() + type.GetLetter();
+            return atlas.Single(s => s.name == name);
+        }
         
         public static bool operator ==(PieceId a, PieceId b)
         {
-            return a.Equals(b);
+            return a?.Equals(b) ?? false;
         }
 
         public static bool operator !=(PieceId a, PieceId b)
@@ -57,6 +73,9 @@ namespace GatheringChess
 
         public bool Equals(PieceId other)
         {
+            if (other == null)
+                return false;
+            
             return type == other.type
                    && edition == other.edition
                    && color == other.color;

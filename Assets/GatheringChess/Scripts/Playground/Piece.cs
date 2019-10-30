@@ -21,7 +21,7 @@ namespace GatheringChess.Playground
                 UpdateAppearance();
             }
         }
-        [SerializeField] private PieceId id;
+        [SerializeField] private PieceId id = PieceId.Default;
 
         public Sprite[] pieceSprites;
 
@@ -85,30 +85,10 @@ namespace GatheringChess.Playground
 
         private void UpdateAppearance()
         {
-            if (spriteRenderer == null || pieceSprites == null)
+            if (spriteRenderer == null)
                 return;
 
-            int index = GetSpriteIndex();
-
-            if (Id.color == PieceColor.Black)
-                index += 6;
-
-            spriteRenderer.sprite = pieceSprites[index];
-        }
-
-        private int GetSpriteIndex()
-        {
-            switch (Id.type)
-            {
-                case PieceType.King: return 0;
-                case PieceType.Queen: return 1;
-                case PieceType.Bishop: return 2;
-                case PieceType.Knight: return 3;
-                case PieceType.Rook: return 4;
-                case PieceType.Pawn: return 5;
-            }
-            
-            throw new Exception("Unknown piece type.");
+            spriteRenderer.sprite = Id.LoadSprite();
         }
 
         /// <summary>
