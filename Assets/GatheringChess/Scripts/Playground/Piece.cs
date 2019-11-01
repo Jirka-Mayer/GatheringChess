@@ -23,8 +23,6 @@ namespace GatheringChess.Playground
         }
         [SerializeField] private PieceId id = PieceId.Default;
 
-        public Sprite[] pieceSprites;
-
         /// <summary>
         /// Coordinates of the piece (in board space)
         /// </summary>

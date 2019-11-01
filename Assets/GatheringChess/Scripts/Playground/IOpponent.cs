@@ -1,12 +1,37 @@
+using System;
 using System.Threading.Tasks;
 
 namespace GatheringChess.Playground
 {
     /// <summary>
-    /// Represents an opponent that makes moves
+    /// Interface we have with the opponent
     /// </summary>
     public interface IOpponent
     {
-        Task<ChessMove> PerformMove(Board board);
+        /// <summary>
+        /// Fired when the opponent finishes a move and gives control to us
+        /// </summary>
+        event Action<ChessMove> OnMoveFinish;
+        
+        /// <summary>
+        /// Fired when the opponent gives up the match
+        /// </summary>
+        event Action OnGiveUp;
+
+        /// <summary>
+        /// Waits for the opponent to get ready
+        /// and also signals that we are ready
+        /// </summary>
+        Task WaitForReady();
+
+        /// <summary>
+        /// We've finished our move and we give control to the opponent
+        /// </summary>
+        void OurMoveWasFinished(ChessMove ourMove);
+
+        /// <summary>
+        /// Call to inform the opponent that we give up the match
+        /// </summary>
+        void WeGiveUp();
     }
 }

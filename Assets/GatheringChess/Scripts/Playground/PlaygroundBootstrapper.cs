@@ -1,3 +1,5 @@
+using System;
+using Unisave;
 using UnityEngine;
 
 namespace GatheringChess.Playground
@@ -8,9 +10,10 @@ namespace GatheringChess.Playground
     public class PlaygroundBootstrapper : MonoBehaviour
     {
         /// <summary>
-        /// Start the playground in debug mode
+        /// What match should be played
+        /// Value is set by the calling scene
         /// </summary>
-        public bool debug;
+        public static MatchEntity matchToStart;
 
         /// <summary>
         /// Board reference
@@ -30,52 +33,118 @@ namespace GatheringChess.Playground
         private void Start()
         {
             if (board == null)
+                throw new ArgumentNullException(nameof(board));
+
+            if (matchToStart == null)
             {
-                Debug.LogError(
-                    "Board reference for playground bootstrapper is missing."
-                );
-                return;
-            }
-            
-            if (debug)
                 StartDebug();
-        }
-
-        private void StartDebug()
-        {
-            // let us have a chess half sets for both players obtained from match entity
-            var whiteSet = ChessHalfSet.CreateDefaultHalfSet(PieceColor.White);
-            var blackSet = ChessHalfSet.CreateDefaultHalfSet(PieceColor.Black);
-            
-            // white set has different king and queen
-            whiteSet.king = new PieceId(PieceType.King, PieceColor.White, PieceEdition.ManRay);
-            whiteSet.queen = new PieceId(PieceType.Queen, PieceColor.White, PieceEdition.ManRay);
-
-            playerColor = PieceColor.White;
-
-            opponent = new ComputerOpponent(playerColor.Opposite());
-            board.CreateBoard(playerColor.IsWhite(), whiteSet, blackSet);
-            
-            RunGame();
+            }
+            else
+            {
+                var match = matchToStart;
+                matchToStart = null;
+                StartRegular(match);
+            }
         }
 
         /// <summary>
-        /// Performs the match
+        /// Start playground for debugging (when launched right
+        /// away from unity editor)
         /// </summary>
-        private async void RunGame()
+        private void StartDebug()
         {
-            if (playerColor.IsWhite())
+            var match = new MatchEntity() {
+                WhitePlayer = Auth.Player,
+                WhitePlayerSet = ChessHalfSet.CreateDefaultHalfSet(
+                    PieceColor.White
+                ),
+                
+                BlackPlayer = null,
+                BlackPlayerSet = ChessHalfSet.CreateDefaultHalfSet(
+                    PieceColor.Black
+                )
+            };
+            
+            StartRegular(match);
+        }
+
+        /// <summary>
+        /// Start playground in a regular fashion when a match is known
+        /// </summary>
+        private async void StartRegular(MatchEntity match)
+        {
+            // which player are we?
+            playerColor = match.WhitePlayer == Auth.Player
+                ? PieceColor.White : PieceColor.Black;
+            
+            // who is the opponent
+            UnisavePlayer opponentPlayer = playerColor.IsWhite()
+                ? match.BlackPlayer : match.WhitePlayer;
+
+            // connect to the opponent
+            if (opponentPlayer == null)
             {
-                await board.LetPlayerHaveAMove();
+                // AI
+                opponent = new ComputerOpponent(playerColor.Opposite(), board);
+            }
+            else
+            {
+                // TODO: setup real connection
             }
             
-            while (true) // while not game over
+            // create and setup the board
+            board.CreateBoard(
+                playerColor.IsWhite(),
+                match.WhitePlayerSet,
+                match.BlackPlayerSet
+            );
+            
+            // register opponent events
+            opponent.OnMoveFinish += OpponentsMoveWasFinished;
+            opponent.OnGiveUp += OpponentGaveUp;
+
+            // wait for the opponent
+            await opponent.WaitForReady();
+            
+            // === start the game ===
+            
+            // if we are white, we are the one to start
+            if (playerColor.IsWhite())
             {
-                ChessMove move = await opponent.PerformMove(board);
-                board.PerformOpponentsMove(move.from, move.to);
-                
-                await board.LetPlayerHaveAMove();
+                PerformOurMove();
             }
+            else
+            {
+                // it's the opponents turn so just wait
+            }
+        }
+
+        /// <summary>
+        /// Let us perform an action
+        /// </summary>
+        private async void PerformOurMove()
+        {
+            var move = await board.LetPlayerHaveAMove();
+            
+            opponent.OurMoveWasFinished(move);
+        }
+
+        /// <summary>
+        /// Called by the opponent when he finishes a move
+        /// </summary>
+        private void OpponentsMoveWasFinished(ChessMove move)
+        {
+            board.PerformOpponentsMove(move.from, move.to);
+            
+            PerformOurMove();
+        }
+
+        /// <summary>
+        /// Called by the opponent when he gives up the match
+        /// </summary>
+        private void OpponentGaveUp()
+        {
+            Debug.Log("Opponent gave up.");
         }
     }
 }

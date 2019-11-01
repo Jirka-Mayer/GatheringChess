@@ -7,14 +7,24 @@ namespace GatheringChess.Playground
 {
     public class ComputerOpponent : IOpponent
     {
-        private PieceColor color;
+        public event Action<ChessMove> OnMoveFinish;
+        public event Action OnGiveUp;
         
-        public ComputerOpponent(PieceColor color)
+        private PieceColor color;
+        private Board board;
+        
+        public ComputerOpponent(PieceColor color, Board board)
         {
             this.color = color;
+            this.board = board;
         }
         
-        public async Task<ChessMove> PerformMove(Board board)
+        public Task WaitForReady()
+        {
+            return Task.CompletedTask;
+        }
+
+        public async void OurMoveWasFinished(ChessMove ourMove)
         {
             for (int x = 0; x < Board.BoardSize; x++)
             for (int y = 0; y < Board.BoardSize; y++)
@@ -29,16 +39,22 @@ namespace GatheringChess.Playground
 
                 await Task.Delay(500);
                 
-                return new ChessMove {
+                OnMoveFinish?.Invoke(new ChessMove {
                     from = new Vector2Int(x, y),
-                    to = FindFreeSpot(board)
-                };
+                    to = FindFreeSpot()
+                });
+                return;
             }
 
             throw new Exception();
         }
 
-        public Vector2Int FindFreeSpot(Board board)
+        public void WeGiveUp()
+        {
+            throw new NotImplementedException();
+        }
+
+        private Vector2Int FindFreeSpot()
         {
             while (true)
             {
