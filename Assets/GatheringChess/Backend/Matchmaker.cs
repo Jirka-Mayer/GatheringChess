@@ -20,9 +20,15 @@ namespace GatheringChess
     public class MatchmakerTicket : BasicMatchmakerTicket
     {
         /// <summary>
+        /// Client is not connected to photon if this is false,
+        /// so he can only play against a computer
+        /// </summary>
+        public bool UsePhoton { get; set; }
+        
+        /// <summary>
         /// Chess set that the player wants to play with
         /// </summary>
-        public ChessHalfSet ChessSet { get; set; }
+        public ChessSet ChessSet { get; set; }
     }
 
     public class MatchmakerFacet : BasicMatchmakerFacet
@@ -39,26 +45,23 @@ namespace GatheringChess
         /// <inheritdoc/>
         protected override void CreateMatches(List<MatchmakerTicket> tickets)
         {
+            // take all players that cannot use photon and match them against AI
+            for (int i = 0; i < tickets.Count; i++)
+            {
+                if (!tickets[i].UsePhoton)
+                {
+                    MatchAgainstComputer(tickets[i]);
+                    tickets.RemoveAt(i);
+                    i--;
+                }
+            }
+            
             // one player waits too long for a match,
             // let them play against a computer
             if (tickets.Count == 1 && tickets[0].WaitingForSeconds > 20)
             {
-                var ticket = tickets[0];
+                MatchAgainstComputer(tickets[0]);
                 tickets.RemoveAt(0);
-                
-                // TODO: randomize colors and pieces, now the AI is always black
-                
-                var match = new MatchEntity {
-                    WhitePlayer = ticket.Player,
-                    WhitePlayerSet = ticket.ChessSet,
-                    
-                    BlackPlayer = null,
-                    BlackPlayerSet = ChessHalfSet.CreateDefaultHalfSet(
-                        PieceColor.Black
-                    )
-                };
-            
-                SaveAndStartMatch(new[] { ticket }, match);
             }
             
             // we have enough players waiting, just pair them
@@ -69,14 +72,31 @@ namespace GatheringChess
 
                 var match = new MatchEntity {
                     WhitePlayer = selectedTickets[0].Player,
-                    WhitePlayerSet = selectedTickets[0].ChessSet,
+                    WhitePlayerSet = selectedTickets[0].ChessSet.whiteHalf,
                     
                     BlackPlayer = selectedTickets[1].Player,
-                    BlackPlayerSet = selectedTickets[1].ChessSet
+                    BlackPlayerSet = selectedTickets[1].ChessSet.blackHalf
                 };
             
                 SaveAndStartMatch(selectedTickets, match);
             }
+        }
+
+        private void MatchAgainstComputer(MatchmakerTicket ticket)
+        {
+            // TODO: randomize colors and pieces, now the AI is always black
+                
+            var match = new MatchEntity {
+                WhitePlayer = ticket.Player,
+                WhitePlayerSet = ticket.ChessSet.whiteHalf,
+                    
+                BlackPlayer = null,
+                BlackPlayerSet = ChessHalfSet.CreateDefaultHalfSet(
+                    PieceColor.Black
+                )
+            };
+            
+            SaveAndStartMatch(new[] { ticket }, match);
         }
     }
 }

@@ -14,4 +14,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/GatheringChess/Scenes/Collection.unity
     guid: 2ae73ddc6bd43461b95d00a743e3e5ff
+  - enabled: 1
+    path: Assets/GatheringChess/Scenes/Matchmaker.unity
+    guid: 41153d66ad444cde6bbbb640b6fb8407
+  - enabled: 1
+    path: Assets/GatheringChess/Scenes/Playground.unity
+    guid: f6f0c665c484a0e7188aa27ac477b4fb
   m_configObjects: {}

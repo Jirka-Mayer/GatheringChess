@@ -8,6 +8,9 @@
 # JetBrains Rider plugin
 [Aa]ssets/Plugins/
 
+# Photon Unity Networking
+[Aa]ssets/Photon/
+
 # meta files are OK, they should be tracked
 
 #########################

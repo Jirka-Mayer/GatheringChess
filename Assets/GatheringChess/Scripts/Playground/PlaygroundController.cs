@@ -1,13 +1,14 @@
 using System;
+using Photon.Pun;
 using Unisave;
 using UnityEngine;
 
 namespace GatheringChess.Playground
 {
     /// <summary>
-    /// Bootstraps a playground scene right after it loads
+    /// Bootstraps and controls a playground scene right after it loads
     /// </summary>
-    public class PlaygroundBootstrapper : MonoBehaviour
+    public class PlaygroundController : MonoBehaviour
     {
         /// <summary>
         /// What match should be played
@@ -85,11 +86,18 @@ namespace GatheringChess.Playground
             if (opponentPlayer == null)
             {
                 // AI
+                Debug.Log("Starting computer opponent.");
                 opponent = new ComputerOpponent(playerColor.Opposite(), board);
             }
             else
             {
-                // TODO: setup real connection
+                // Real person
+                // TODO: maybe there will be a problem with the photon view...
+                GameObject go = new GameObject("UnisaveCoroutineRunner");
+                go.AddComponent<PhotonView>();
+                var photonOpponent = go.AddComponent<PhotonOpponent>();
+                photonOpponent.Initialize(match.EntityId);
+                opponent = photonOpponent;
             }
             
             // create and setup the board
@@ -104,11 +112,13 @@ namespace GatheringChess.Playground
             opponent.OnGiveUp += OpponentGaveUp;
 
             // wait for the opponent
+            Debug.Log("Waiting for the opponent...");
             await opponent.WaitForReady();
             
             // === start the game ===
             
             // if we are white, we are the one to start
+            Debug.Log("Game has started.");
             if (playerColor.IsWhite())
             {
                 PerformOurMove();
