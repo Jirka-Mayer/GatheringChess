@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using GatheringChess.Matchmaker;
 using Photon.Pun;
 using Photon.Realtime;
+using Unisave.Serialization;
 using UnityEngine;
 
 namespace GatheringChess.Playground
@@ -17,6 +18,7 @@ namespace GatheringChess.Playground
         
         public event Action<ChessMove> OnMoveFinish;
         public event Action OnGiveUp;
+        public event Action OnOutOfTime;
 
         /// <summary>
         /// Any long running tasks should be killed
@@ -97,18 +99,16 @@ namespace GatheringChess.Playground
             photonView.RPC(
                 nameof(OtherSideFinishedMove),
                 RpcTarget.Others,
-                ourMove.from.x, ourMove.from.y,
-                ourMove.to.x, ourMove.to.y
+                Serializer.ToJson(ourMove).ToString()
             );
         }
 
         [PunRPC]
-        public void OtherSideFinishedMove(int fromX, int fromY, int toX, int toY)
+        public void OtherSideFinishedMove(string jsonMove)
         {
-            OnMoveFinish?.Invoke(new ChessMove() {
-                from = new Vector2Int(fromX, fromY),
-                to = new Vector2Int(toX, toY)
-            });
+            OnMoveFinish?.Invoke(
+                Serializer.FromJsonString<ChessMove>(jsonMove)
+            );
         }
 
         public void WeGiveUp()
@@ -123,6 +123,20 @@ namespace GatheringChess.Playground
         public void OtherSideGaveUp()
         {
             OnGiveUp?.Invoke();
+        }
+        
+        public void WeRanOutOfTime()
+        {
+            photonView.RPC(
+                nameof(OtherSideRanOutOfTime),
+                RpcTarget.Others
+            );
+        }
+
+        [PunRPC]
+        public void OtherSideRanOutOfTime()
+        {
+            OnOutOfTime?.Invoke();
         }
 
         private void OnDestroy()

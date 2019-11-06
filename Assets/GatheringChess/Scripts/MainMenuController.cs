@@ -1,6 +1,7 @@
 ﻿using System;
 using GatheringChess.Entities;
 using GatheringChess.Facets;
+using Photon.Pun;
 using Unisave;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -29,6 +30,14 @@ namespace GatheringChess
 
             currencies.text = "<b>Coins:</b> " + playerEntity.Coins + "\n" +
                               "<b>Gems:</b> " + playerEntity.Gems;
+            
+            // TODO: hack for MatchResult scene
+            // remove this later when fixed
+            if (PhotonNetwork.IsConnected)
+            {
+                Debug.Log("Disconnected from photon.");
+                PhotonNetwork.Disconnect();
+            }
         }
 
         public void OpenMyCollection()

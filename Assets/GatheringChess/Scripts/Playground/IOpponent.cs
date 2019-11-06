@@ -17,6 +17,11 @@ namespace GatheringChess.Playground
         /// Fired when the opponent gives up the match
         /// </summary>
         event Action OnGiveUp;
+        
+        /// <summary>
+        /// Fired when the opponent runs out of time
+        /// </summary>
+        event Action OnOutOfTime;
 
         /// <summary>
         /// Waits for the opponent to get ready
@@ -33,5 +38,10 @@ namespace GatheringChess.Playground
         /// Call to inform the opponent that we give up the match
         /// </summary>
         void WeGiveUp();
+        
+        /// <summary>
+        /// Call to inform the opponent that we ran out of time
+        /// </summary>
+        void WeRanOutOfTime();
     }
 }

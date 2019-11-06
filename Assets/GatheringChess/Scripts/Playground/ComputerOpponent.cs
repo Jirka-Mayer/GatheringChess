@@ -9,6 +9,7 @@ namespace GatheringChess.Playground
     {
         public event Action<ChessMove> OnMoveFinish;
         public event Action OnGiveUp;
+        public event Action OnOutOfTime;
         
         private PieceColor color;
         private Board board;
@@ -46,8 +47,12 @@ namespace GatheringChess.Playground
                 await Task.Delay(Random.Range(500, 5_000));
 
                 float duration = clock.StopMe();
-                
-                // TODO clock.IsTimeOverForMe()
+
+                if (clock.IsTimeOverForMe())
+                {
+                    OnOutOfTime?.Invoke();
+                    return;
+                }
                 
                 OnMoveFinish?.Invoke(new ChessMove {
                     from = new Vector2Int(x, y),
@@ -62,7 +67,12 @@ namespace GatheringChess.Playground
 
         public void WeGiveUp()
         {
-            
+            //
+        }
+
+        public void WeRanOutOfTime()
+        {
+            //
         }
 
         private Vector2Int FindFreeSpot()

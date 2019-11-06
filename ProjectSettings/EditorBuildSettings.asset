@@ -20,4 +20,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/GatheringChess/Scenes/Playground.unity
     guid: f6f0c665c484a0e7188aa27ac477b4fb
+  - enabled: 1
+    path: Assets/GatheringChess/Scenes/MatchResult.unity
+    guid: 1438b210a22cd0ac9bd237dd2ad71feb
   m_configObjects: {}

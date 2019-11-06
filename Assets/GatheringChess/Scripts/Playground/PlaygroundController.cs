@@ -1,4 +1,5 @@
 using System;
+using GatheringChess.MatchResultScene;
 using Photon.Pun;
 using Unisave;
 using UnityEngine;
@@ -81,11 +82,14 @@ namespace GatheringChess.Playground
 
                 if (myTurn && clock.IsTimeOverForMe())
                 {
-                    // TODO: handle match result
-                    OnLeaveMatchButtonClick();
+                    OnOurTimeOver();
                 }
             }
         }
+        
+        ///////////////////
+        // Game starting //
+        ///////////////////
 
         /// <summary>
         /// Start playground for debugging (when launched right
@@ -154,7 +158,8 @@ namespace GatheringChess.Playground
             
             // register opponent events
             opponent.OnMoveFinish += OpponentsMoveWasFinished;
-            opponent.OnGiveUp += OpponentGaveUp;
+            opponent.OnGiveUp += OnOpponentGaveUp;
+            opponent.OnOutOfTime += OnOpponentTimeOver;
 
             // wait for the opponent
             Debug.Log("Waiting for the opponent...");
@@ -174,6 +179,10 @@ namespace GatheringChess.Playground
                 clock.StartOpponent();
             }
         }
+        
+        ////////////////////
+        // Core game loop //
+        ////////////////////
 
         /// <summary>
         /// Let us perform an action
@@ -212,22 +221,63 @@ namespace GatheringChess.Playground
             
             PerformOurMove();
         }
+        
+        ////////////////////
+        // Event handlers //
+        ////////////////////
 
         /// <summary>
         /// Called by the opponent when he gives up the match
         /// </summary>
-        private void OpponentGaveUp()
+        private void OnOpponentGaveUp()
         {
             Debug.Log("Opponent gave up.");
             
-            SceneManager.LoadScene("MainMenu");
+            EndMatch(new MatchResult(
+                true,
+                "Opponent gave up."
+            ));
         }
 
         public void OnLeaveMatchButtonClick()
         {
             opponent.WeGiveUp();
             
-            SceneManager.LoadScene("MainMenu");
+            EndMatch(new MatchResult(
+                false,
+                "You gave up."
+            ));
+        }
+
+        /// <summary>
+        /// Called by the opponent when his time runs out
+        /// </summary>
+        private void OnOpponentTimeOver()
+        {
+            EndMatch(new MatchResult(
+                true,
+                "Opponent ran out of time."
+            ));
+        }
+
+        public void OnOurTimeOver()
+        {
+            opponent.WeRanOutOfTime();
+
+            EndMatch(new MatchResult(
+                false,
+                "You ran out of time."
+            ));
+        }
+        
+        ///////////////////////
+        // Leaving the match //
+        ///////////////////////
+
+        public void EndMatch(MatchResult result)
+        {
+            MatchResultController.matchResultToDisplay = result;
+            SceneManager.LoadScene("MatchResult");
         }
     }
 }
