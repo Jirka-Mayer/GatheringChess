@@ -3,6 +3,7 @@ using Photon.Pun;
 using Unisave;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace GatheringChess.Playground
 {
@@ -21,6 +22,10 @@ namespace GatheringChess.Playground
         /// Board reference
         /// </summary>
         public Board board;
+        
+        // time text references
+        public Text myTimeText;
+        public Text opponentTimeText;
 
         /// <summary>
         /// Represents the opponent
@@ -31,11 +36,24 @@ namespace GatheringChess.Playground
         /// Color of player on this computer
         /// </summary>
         private PieceColor playerColor;
+
+        private Clock clock;
+
+        /// <summary>
+        /// Is currently running my turn?
+        /// </summary>
+        private bool myTurn;
         
         private void Start()
         {
             if (board == null)
                 throw new ArgumentNullException(nameof(board));
+            
+            if (myTimeText == null)
+                throw new ArgumentNullException(nameof(myTimeText));
+            
+            if (opponentTimeText == null)
+                throw new ArgumentNullException(nameof(opponentTimeText));
 
             if (matchToStart == null)
             {
@@ -46,6 +64,26 @@ namespace GatheringChess.Playground
                 var match = matchToStart;
                 matchToStart = null;
                 StartRegular(match);
+            }
+        }
+
+        private void Update()
+        {
+            if (clock != null)
+            {
+                myTimeText.text = Clock.FormatTime(
+                    clock.MyDisplayTime
+                );
+                
+                opponentTimeText.text = Clock.FormatTime(
+                    clock.OpponentDisplayTime
+                );
+
+                if (myTurn && clock.IsTimeOverForMe())
+                {
+                    // TODO: handle match result
+                    OnLeaveMatchButtonClick();
+                }
             }
         }
 
@@ -91,7 +129,11 @@ namespace GatheringChess.Playground
             {
                 // AI
                 Debug.Log("Starting computer opponent...");
-                opponent = new ComputerOpponent(playerColor.Opposite(), board);
+                opponent = new ComputerOpponent(
+                    playerColor.Opposite(),
+                    board,
+                    match.Duration
+                );
             }
             else
             {
@@ -106,6 +148,9 @@ namespace GatheringChess.Playground
                 match.WhitePlayerSet,
                 match.BlackPlayerSet
             );
+            
+            // create the clock
+            clock = new Clock(match.Duration);
             
             // register opponent events
             opponent.OnMoveFinish += OpponentsMoveWasFinished;
@@ -126,6 +171,7 @@ namespace GatheringChess.Playground
             else
             {
                 // it's the opponents turn so just wait
+                clock.StartOpponent();
             }
         }
 
@@ -134,7 +180,21 @@ namespace GatheringChess.Playground
         /// </summary>
         private async void PerformOurMove()
         {
+            // === our turn begins ===
+            
+            myTurn = true;
+            
+            clock.StartMe();
+            
             var move = await board.LetPlayerHaveAMove();
+            
+            move.duration = clock.StopMe();
+            
+            // === opponent turn begins ===
+            
+            myTurn = false;
+            
+            clock.StartOpponent();
             
             opponent.OurMoveWasFinished(move);
         }
@@ -144,7 +204,11 @@ namespace GatheringChess.Playground
         /// </summary>
         private void OpponentsMoveWasFinished(ChessMove move)
         {
+            clock.StopOpponent(move.duration);
+            
             board.PerformOpponentsMove(move.from, move.to);
+            
+            // === our turn begins ===
             
             PerformOurMove();
         }
@@ -155,6 +219,13 @@ namespace GatheringChess.Playground
         private void OpponentGaveUp()
         {
             Debug.Log("Opponent gave up.");
+            
+            SceneManager.LoadScene("MainMenu");
+        }
+
+        public void OnLeaveMatchButtonClick()
+        {
+            opponent.WeGiveUp();
             
             SceneManager.LoadScene("MainMenu");
         }

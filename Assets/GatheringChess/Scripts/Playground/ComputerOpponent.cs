@@ -12,11 +12,15 @@ namespace GatheringChess.Playground
         
         private PieceColor color;
         private Board board;
+
+        private Clock clock;
         
-        public ComputerOpponent(PieceColor color, Board board)
+        public ComputerOpponent(PieceColor color, Board board, float duration)
         {
             this.color = color;
             this.board = board;
+            
+            clock = new Clock(duration);
         }
         
         public Task WaitForReady()
@@ -26,6 +30,8 @@ namespace GatheringChess.Playground
 
         public async void OurMoveWasFinished(ChessMove ourMove)
         {
+            clock.StartMe();
+            
             for (int x = 0; x < Board.BoardSize; x++)
             for (int y = 0; y < Board.BoardSize; y++)
             {
@@ -37,11 +43,16 @@ namespace GatheringChess.Playground
                 if (piece.Id.color != color)
                     continue;
 
-                await Task.Delay(500);
+                await Task.Delay(Random.Range(500, 5_000));
+
+                float duration = clock.StopMe();
+                
+                // TODO clock.IsTimeOverForMe()
                 
                 OnMoveFinish?.Invoke(new ChessMove {
                     from = new Vector2Int(x, y),
-                    to = FindFreeSpot()
+                    to = FindFreeSpot(),
+                    duration = duration
                 });
                 return;
             }
@@ -51,7 +62,7 @@ namespace GatheringChess.Playground
 
         public void WeGiveUp()
         {
-            throw new NotImplementedException();
+            
         }
 
         private Vector2Int FindFreeSpot()

@@ -16,5 +16,10 @@ namespace GatheringChess.Playground
         /// Final piece position
         /// </summary>
         public Vector2Int to;
+
+        /// <summary>
+        /// How many seconds did the move take
+        /// </summary>
+        public float duration;
     }
 }

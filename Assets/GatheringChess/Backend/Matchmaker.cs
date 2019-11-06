@@ -15,6 +15,9 @@ namespace GatheringChess
         [X]
         public ChessHalfSet WhitePlayerSet { get; set; }
         [X] public ChessHalfSet BlackPlayerSet { get; set; }
+        
+        // duration of the match in seconds
+        [X] public float Duration { get; set; } = 30f;
     }
 
     public class MatchmakerTicket : BasicMatchmakerTicket
