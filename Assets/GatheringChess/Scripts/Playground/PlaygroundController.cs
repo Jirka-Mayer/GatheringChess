@@ -2,6 +2,7 @@ using System;
 using Photon.Pun;
 using Unisave;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace GatheringChess.Playground
 {
@@ -54,6 +55,9 @@ namespace GatheringChess.Playground
         /// </summary>
         private void StartDebug()
         {
+            Debug.LogWarning("No startup match provided, creating a " +
+                             "debugging match against the computer.");
+        
             var match = new MatchEntity() {
                 WhitePlayer = Auth.Player,
                 WhitePlayerSet = ChessHalfSet.CreateDefaultHalfSet(
@@ -86,18 +90,14 @@ namespace GatheringChess.Playground
             if (opponentPlayer == null)
             {
                 // AI
-                Debug.Log("Starting computer opponent.");
+                Debug.Log("Starting computer opponent...");
                 opponent = new ComputerOpponent(playerColor.Opposite(), board);
             }
             else
             {
                 // Real person
-                // TODO: maybe there will be a problem with the photon view...
-                GameObject go = new GameObject("UnisaveCoroutineRunner");
-                go.AddComponent<PhotonView>();
-                var photonOpponent = go.AddComponent<PhotonOpponent>();
-                photonOpponent.Initialize(match.EntityId);
-                opponent = photonOpponent;
+                Debug.Log("Connecting to photon opponent...");
+                opponent = PhotonOpponent.CreateInstance(match.EntityId);
             }
             
             // create and setup the board
@@ -155,6 +155,8 @@ namespace GatheringChess.Playground
         private void OpponentGaveUp()
         {
             Debug.Log("Opponent gave up.");
+            
+            SceneManager.LoadScene("MainMenu");
         }
     }
 }

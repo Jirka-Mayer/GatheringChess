@@ -1,12 +1,14 @@
 ﻿using System;
 using GatheringChess.Playground;
 using Photon.Pun;
-using Photon.Realtime;
 using UnityEngine;
 
 namespace GatheringChess.Matchmaker
 {
-    public class MatchmakerController : MonoBehaviourPunCallbacks
+    /// <summary>
+    /// Controls the matchmaker scene
+    /// </summary>
+    public class MatchmakerController : MonoBehaviour
     {
         /// <summary>
         /// Reference to the matchmaker client

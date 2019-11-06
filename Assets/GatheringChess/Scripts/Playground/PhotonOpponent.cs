@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using GatheringChess.Matchmaker;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
@@ -8,6 +9,12 @@ namespace GatheringChess.Playground
 {
     public class PhotonOpponent : MonoBehaviourPunCallbacks, IOpponent
     {
+        /// <summary>
+        /// View ID that is used for communication between
+        /// the two PhotonOpponent instances
+        /// </summary>
+        private const int PhotonViewId = 8; // just a number between 1 and 999
+        
         public event Action<ChessMove> OnMoveFinish;
         public event Action OnGiveUp;
 
@@ -25,10 +32,27 @@ namespace GatheringChess.Playground
         private TaskCompletionSource<bool> roomJoiningPromise;
 
         /// <summary>
+        /// Creates new instance of the photon opponent
+        /// (this class lives in the scene because it uses a photon view)
+        /// </summary>
+        public static PhotonOpponent CreateInstance(string roomName)
+        {
+            GameObject go = new GameObject(nameof(PhotonClient));
+            
+            var photonView = go.AddComponent<PhotonView>();
+            photonView.ViewID = PhotonViewId;
+            
+            var photonOpponent = go.AddComponent<PhotonOpponent>();
+            photonOpponent.Initialize(roomName);
+            
+            return photonOpponent;
+        }
+
+        /// <summary>
         /// Called right after instantiation (before start even)
         /// Acts as a constructor
         /// </summary>
-        public void Initialize(string roomName)
+        private void Initialize(string roomName)
         {
             if (!PhotonNetwork.IsConnected)
                 throw new InvalidOperationException();
@@ -89,7 +113,16 @@ namespace GatheringChess.Playground
 
         public void WeGiveUp()
         {
-            throw new NotImplementedException();
+            photonView.RPC(
+                nameof(OtherSideGaveUp),
+                RpcTarget.Others
+            );
+        }
+
+        [PunRPC]
+        public void OtherSideGaveUp()
+        {
+            OnGiveUp?.Invoke();
         }
 
         private void OnDestroy()

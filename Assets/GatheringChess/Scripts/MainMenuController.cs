@@ -36,6 +36,11 @@ namespace GatheringChess
             SceneManager.LoadScene("Collection");
         }
 
+        public void StartGame()
+        {
+            SceneManager.LoadScene("Matchmaker");
+        }
+
         public void Logout()
         {
             Auth.Logout().Then(() => {

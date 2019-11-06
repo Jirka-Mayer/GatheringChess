@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace GatheringChess.Matchmaker
 {
+    /// <summary>
+    /// Contains photon interactions for the matchmaker scene
+    /// </summary>
     public class PhotonClient : MonoBehaviourPunCallbacks
     {
         /// <summary>
