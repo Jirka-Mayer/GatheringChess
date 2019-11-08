@@ -100,8 +100,8 @@ namespace GatheringChess.Playground
             pieces = new List<Piece>();
 
             // white
-            for (int i = 0; i < BoardSize; i++)
-                CreatePiece(i, 1, whiteSet.pawns[i]);
+//            for (int i = 0; i < BoardSize; i++)
+//                CreatePiece(i, 1, whiteSet.pawns[i]);
         
             CreatePiece(0, 0, whiteSet.leftRook);
             CreatePiece(1, 0, whiteSet.leftKnight);

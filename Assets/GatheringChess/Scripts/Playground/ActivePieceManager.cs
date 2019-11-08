@@ -48,7 +48,9 @@ namespace GatheringChess.Playground
             
             // === list possible moves ===
 
-            possibleMoves = ActivePiece.GetPossibleMoves(board);
+            possibleMoves = PieceMovement.GetPossibleMoves(
+                piece.Position, piece.pieceId, board
+            );
             
             // === update board highlights ===
             

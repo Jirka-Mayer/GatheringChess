@@ -137,37 +137,5 @@ namespace GatheringChess.Playground
         
         public void MovePieceTo(int x, int y)
             => MovePieceTo(new Vector2Int(x, y));
-
-        /// <summary>
-        /// Returns a list of moves this piece could do
-        /// </summary>
-        public List<ChessMove> GetPossibleMoves(Board board)
-        {
-            // TODO: remake
-            
-            var moves = new List<ChessMove>();
-            
-            foreach (Vector2Int pos in Board.IteratePositions())
-            {
-                if (pos == Position)
-                    continue;
-
-                if ((pos - Position).magnitude > 2f)
-                    continue;
-
-                PieceId pieceIdAtPos = board.GetPieceIdAt(pos);
-                
-                if (pieceIdAtPos != null && pieceIdAtPos.color == pieceId.color)
-                    continue;
-
-                moves.Add(new ChessMove {
-                    origin = Position,
-                    target = pos,
-                    kill = pieceIdAtPos != null
-                });
-            }
-
-            return moves;
-        }
     }
 }
