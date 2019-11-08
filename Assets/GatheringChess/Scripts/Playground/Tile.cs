@@ -1,9 +1,8 @@
 ﻿using System;
 using UnityEngine;
 
-namespace GatheringChess
+namespace GatheringChess.Playground
 {
-    [ExecuteInEditMode]
     public class Tile : MonoBehaviour
     {
         public SpriteRenderer spriteRenderer;
@@ -62,7 +61,10 @@ namespace GatheringChess
 
         public event Action<Tile> OnClick;
 
-        public Vector2Int Coordinates { get; set; }
+        /// <summary>
+        /// Position of the tile in board coordinates
+        /// </summary>
+        public Vector2Int Position { get; set; }
 
         void OnValidate()
         {

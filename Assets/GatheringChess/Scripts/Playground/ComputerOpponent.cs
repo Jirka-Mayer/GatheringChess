@@ -33,15 +33,14 @@ namespace GatheringChess.Playground
         {
             clock.StartMe();
             
-            for (int x = 0; x < Board.BoardSize; x++)
-            for (int y = 0; y < Board.BoardSize; y++)
+            foreach (Vector2Int pos in Board.IteratePositions())
             {
-                Piece piece = board[x, y];
+                PieceId pieceId = board.GetPieceIdAt(pos);
                 
-                if (piece == null)
+                if (pieceId == null)
                     continue;
                 
-                if (piece.Id.color != color)
+                if (pieceId.color != color)
                     continue;
 
                 await Task.Delay(Random.Range(500, 5_000));
@@ -55,8 +54,8 @@ namespace GatheringChess.Playground
                 }
                 
                 OnMoveFinish?.Invoke(new ChessMove {
-                    from = new Vector2Int(x, y),
-                    to = FindFreeSpot(),
+                    origin = pos,
+                    target = FindFreeSpot(),
                     duration = duration
                 });
                 return;
@@ -82,7 +81,7 @@ namespace GatheringChess.Playground
                 int x = Random.Range(0, Board.BoardSize - 1);
                 int y = Random.Range(0, Board.BoardSize - 1);
                 
-                if (board[x, y] == null)
+                if (board.GetPieceIdAt(new Vector2Int(x, y)) == null)
                     return new Vector2Int(x, y);
             }
         }

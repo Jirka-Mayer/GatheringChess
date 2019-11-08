@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using GatheringChess.MatchResultScene;
 using Photon.Pun;
 using Unisave;
@@ -194,9 +195,19 @@ namespace GatheringChess.Playground
             myTurn = true;
             
             clock.StartMe();
-            
-            var move = await board.LetPlayerHaveAMove();
-            
+
+            ChessMove move;
+            try
+            {
+                move = await board.LetPlayerHaveAMove(playerColor);
+            }
+            catch (TaskCanceledException)
+            {
+                // board has been destroyed in our turn,
+                // we're probably leaving the scene
+                return;
+            }
+
             move.duration = clock.StopMe();
             
             // === opponent turn begins ===
@@ -215,7 +226,7 @@ namespace GatheringChess.Playground
         {
             clock.StopOpponent(move.duration);
             
-            board.PerformOpponentsMove(move.from, move.to);
+            board.PerformMove(move);
             
             // === our turn begins ===
             
@@ -276,6 +287,10 @@ namespace GatheringChess.Playground
 
         public void EndMatch(MatchResult result)
         {
+            // TODO: wait for photon to finish RPCs and the leave the scene
+            
+            board.CancelLetPlayerHaveAMove();
+            
             MatchResultController.matchResultToDisplay = result;
             SceneManager.LoadScene("MatchResult");
         }

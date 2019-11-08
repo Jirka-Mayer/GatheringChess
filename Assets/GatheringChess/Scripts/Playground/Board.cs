@@ -2,45 +2,78 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Unisave.Examples.Local.Leaderboard;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace GatheringChess.Playground
 {
+    /// <summary>
+    /// Contains current board state and manages piece movement
+    /// </summary>
     public class Board : MonoBehaviour
     {
+        /// <summary>
+        /// Size of the chess board
+        /// </summary>
         public const int BoardSize = 8;
 
+        /// <summary>
+        /// Reference to a tile prefab
+        /// </summary>
         public GameObject tilePrefab;
+        
+        /// <summary>
+        /// Reference to a piece prefab
+        /// </summary>
         public GameObject piecePrefab;
 
-        private Tile[,] tiles; // X: (a, b, ..., h), Y: (1, 2, ..., 8)      [X, Y]
+        /// <summary>
+        /// Reference to an active piece manager
+        /// </summary>
+        public ActivePieceManager activePieceManager;
+
+        /// <summary>
+        /// Individual tiles of the board that can be clicked
+        /// </summary>
+        private Tile[,] tiles; // X: (a, b, ..., h), Y: (1, 2, ..., 8)    [X, Y]
+        
+        /// <summary>
+        /// All pieces that exist on the board
+        /// </summary>
         private List<Piece> pieces;
-
+        
         /// <summary>
-        /// What color does the player play for
+        /// Chess color that is allowed to be moved by the user
+        /// When null, no color can be moved
         /// </summary>
-        private bool isPlayerWhite;
+        private PieceColor? colorPlayerCanMove;
 
-        /// <summary>
-        /// Is currently playing the local player?
-        /// </summary>
-        private bool playersTurn = false;
+        private TaskCompletionSource<ChessMove> playerPerformsMovePromise;
 
-        private Piece activePiece = null;
-        private List<Tile> possibleTargets;
+        void Start()
+        {
+            if (tilePrefab == null)
+                throw new ArgumentNullException(nameof(tilePrefab));
+            
+            if (piecePrefab == null)
+                throw new ArgumentNullException(nameof(piecePrefab));
+            
+            if (activePieceManager == null)
+                throw new ArgumentNullException(nameof(activePieceManager));
+        }
 
-        private Action<ChessMove> onPlayerMoveDone;
-
-        public Piece this[int x, int y]
-            => pieces.FirstOrDefault(p => p.Coordinates.x == x && p.Coordinates.y == y);
+        private void OnDestroy()
+        {
+            playerPerformsMovePromise?.SetCanceled();
+            playerPerformsMovePromise = null;
+        }
 
         /// <summary>
         /// Call this before using the chess board
         /// </summary>
         public void CreateBoard(bool isPlayerWhite, ChessHalfSet whiteSet, ChessHalfSet blackSet)
         {
-            this.isPlayerWhite = isPlayerWhite;
-
             // rotate chessboard 180 deg
             if (!isPlayerWhite)
             {
@@ -53,21 +86,11 @@ namespace GatheringChess.Playground
             for (int x = 0; x < BoardSize; x++)
             for (int y = 0; y < BoardSize; y++)
             {
-                var go = Instantiate(
-                    tilePrefab,
-                    new Vector3(
-                        x - BoardSize / 2 + 0.5f,
-                        y - BoardSize / 2 + 0.5f,
-                        0
-                    ),
-                    Quaternion.identity
-                );
-                go.transform.SetParent(this.transform, false);
-                go.transform.rotation = Quaternion.identity;
+                var go = InstantiatePrefabAt(tilePrefab, new Vector2Int(x, y));
 
                 var tile = go.GetComponent<Tile>();
                 tile.IsWhite = (x % 2 == 0) ^ (y % 2 == 0);
-                tile.Coordinates = new Vector2Int(x, y);
+                tile.Position = new Vector2Int(x, y);
                 tile.OnClick += TileClicked;
 
                 tiles[x, y] = tile;
@@ -103,139 +126,197 @@ namespace GatheringChess.Playground
             CreatePiece(7, 7, blackSet.rightRook);
         }
 
-        private void CreatePiece(int x, int y, PieceId pieceId)
+        /// <summary>
+        /// Instantiates a prefab as a child
+        /// of the board object at proper position
+        /// </summary>
+        public GameObject InstantiatePrefabAt(
+            GameObject prefab,
+            Vector2Int position
+        )
         {
-            var go = Instantiate(
-                piecePrefab,
-                Vector3.zero,
+            GameObject instance = Instantiate(
+                prefab,
+                new Vector3(
+                    position.x - BoardSize / 2 + 0.5f,
+                    position.y - BoardSize / 2 + 0.5f,
+                    0
+                ),
                 Quaternion.identity
             );
-            go.transform.SetParent(this.transform, false);
-            go.transform.rotation = Quaternion.identity;
+            instance.transform.SetParent(transform, false);
+            instance.transform.rotation = Quaternion.identity;
+
+            return instance;
+        }
+
+        /// <summary>
+        /// Creates a piece of given id at a given position
+        /// </summary>
+        private void CreatePiece(int x, int y, PieceId pieceId)
+        {
+            var go = InstantiatePrefabAt(piecePrefab, new Vector2Int(x, y));
 
             var piece = go.GetComponent<Piece>();
-            piece.Id = pieceId;
-            piece.MovePieceTo(x, y, false);
+            piece.pieceId = pieceId;
+            piece.SetPosition(x, y);
 
             pieces.Add(piece);
         }
 
+        /// <summary>
+        /// Iterates over all board positions in unspecified order
+        /// </summary>
+        public static IEnumerable<Vector2Int> IteratePositions()
+        {
+            for (int y = 0; y < BoardSize; y++)
+            for (int x = 0; x < BoardSize; x++)
+            {
+                yield return new Vector2Int(x, y);
+            }
+        }
+        
+        /// <summary>
+        /// Returns piece instance at a given position or null
+        /// </summary>
+        private Piece GetPieceAt(Vector2Int position)
+        {
+            return pieces.FirstOrDefault(p => p.Position == position);
+        }
+
+        /// <summary>
+        /// Returns ID of the piece at a given position or null
+        /// </summary>
+        public PieceId GetPieceIdAt(Vector2Int position)
+        {
+            return GetPieceAt(position)?.pieceId;
+        }
+        
+        /// <summary>
+        /// Called by the tile when it gets clicked
+        /// </summary>
         private void TileClicked(Tile tile)
         {
-            // clicking works only when the player can play
-            if (!playersTurn)
+            // clicking works only when pieces can be moved
+            if (colorPlayerCanMove == null)
                 return;
 
-            // activating a piece
-            if (activePiece == null)
+            // === activating a piece ===
+
+            Piece clickedPiece = GetPieceAt(tile.Position);
+            
+            if (activePieceManager.ActivePiece == null
+                && clickedPiece != null
+                && clickedPiece.pieceId.color == colorPlayerCanMove)
             {
-                ActivatePiece(
-                    GetPieceOn(tile.Coordinates.x, tile.Coordinates.y) // null is ok
-                );
+                activePieceManager.SetPieceAsActive(clickedPiece, this);
+                return;
+            }
+            
+            // continue only if some piece is active
+            if (activePieceManager.ActivePiece == null)
+                return;
+            
+            // === clicking on tile that is a possible move ===
+            
+            ChessMove selectedMove = activePieceManager.GetActivePieceMoveTo(
+                tile.Position
+            );
+            
+            if (selectedMove != null)
+            {
+                // deactivate piece
+                activePieceManager.DeactivateActivePiece();
+                
+                // perform the move
+                PerformMove(selectedMove);
+                
+                // disable further piece movement 
+                colorPlayerCanMove = null;
+                
+                // resolve task
+                playerPerformsMovePromise?.SetResult(selectedMove);
+                playerPerformsMovePromise = null;
+                
                 return;
             }
 
-            // deactivating a piece (clicking where no target exists)
-            if (!possibleTargets.Contains(tile))
-            {
-                DeactivatePiece();
-                return;
-            }
-
-            // killing the enemy
-            Piece targetPiece = GetPieceOn(tile.Coordinates.x, tile.Coordinates.y);
-            if (targetPiece != null)
-            {
-                KillPiece(targetPiece);
-            }
-
-            // moving the piece to a target
-            var pieceToMove = activePiece;
-            Vector2Int from = pieceToMove.Coordinates;
-            DeactivatePiece();
-
-            pieceToMove.MovePieceTo(tile.Coordinates.x, tile.Coordinates.y, true);
-
-            // player move is done
-            onPlayerMoveDone?.Invoke(new ChessMove {
-                from = from,
-                to = tile.Coordinates
-            });
+            // === deactivating a piece (clicking where no target exists) ===
+            
+            activePieceManager.DeactivateActivePiece();
         }
 
-        private void ActivatePiece(Piece piece)
+        /// <summary>
+        /// Lets the player move pieces of given color
+        /// </summary>
+        public Task<ChessMove> LetPlayerHaveAMove(PieceColor color)
         {
-            if (piece == null)
-                return;
-
-            if (piece.Id.color.IsWhite() != isPlayerWhite)
-                return;
-
-            activePiece = piece;
-            tiles[piece.Coordinates.x, piece.Coordinates.y].IsActive = true;
-            possibleTargets = piece.GetPossibleTargets(tiles, pieces);
-            foreach (var t in possibleTargets)
-                t.IsTarget = true;
+            if (playerPerformsMovePromise != null)
+                throw new InvalidOperationException();
+            
+            colorPlayerCanMove = color;
+            playerPerformsMovePromise = new TaskCompletionSource<ChessMove>();
+            return playerPerformsMovePromise.Task;
         }
 
-        private void DeactivatePiece()
+        /// <summary>
+        /// Cancels player movement task
+        /// </summary>
+        public void CancelLetPlayerHaveAMove()
         {
-            if (activePiece == null)
-                return;
-
-            tiles[activePiece.Coordinates.x, activePiece.Coordinates.y].IsActive = false;
-            foreach (var t in possibleTargets)
-                t.IsTarget = false;
-        
-            activePiece = null;
-            possibleTargets = null;
+            colorPlayerCanMove = null;
+            activePieceManager.DeactivateActivePiece();
+            
+            playerPerformsMovePromise?.SetCanceled();
+            playerPerformsMovePromise = null;
         }
 
-        private Piece GetPieceOn(int x, int y)
+        /// <summary>
+        /// Perform a move
+        /// </summary>
+        public void PerformMove(ChessMove move)
         {
-            foreach (Piece p in pieces)
-            {
-                if (p.Coordinates.x == x && p.Coordinates.y == y)
-                    return p;
-            }
-
-            return null;
-        }
-
-        public Task<ChessMove> LetPlayerHaveAMove()
-        {
-            playersTurn = true;
-
-            var promise = new TaskCompletionSource<ChessMove>();
-
-            onPlayerMoveDone += (move) => {
-                playersTurn = false;
-                onPlayerMoveDone = null;
-                promise.SetResult(move);
-            };
-
-            return promise.Task;
-        }
-
-        public void PerformOpponentsMove(Vector2Int from, Vector2Int to)
-        {
-            Piece pieceToMove = GetPieceOn(from.x, from.y);
-
+            Piece pieceToMove = GetPieceAt(move.origin);
+            
             if (pieceToMove == null)
-                throw new Exception("Opponent played a move that is inconsistent with our state.");
+                throw new ArgumentException(
+                    "There's no piece to be moved " +
+                    $"from specified position {move.origin}"
+                );
 
-            Piece targetPiece = GetPieceOn(to.x, to.y);
-        
+            Piece targetPiece = GetPieceAt(move.target);
+
             if (targetPiece != null)
-                KillPiece(targetPiece);
+            {
+                if (!move.kill)
+                    throw new ArgumentException(
+                        "There's no piece to be killed, but the move " +
+                        "suggests there should."
+                    );
+                
+                // kill piece
+                KillPieceAt(move.target);
+            }
 
-            pieceToMove.MovePieceTo(to.x, to.y, true);
+            pieceToMove.MovePieceTo(move.target);
         }
 
-        public void KillPiece(Piece piece)
+        /// <summary>
+        /// Kills piece at given position
+        /// </summary>
+        public void KillPieceAt(Vector2Int position)
         {
+            var piece = GetPieceAt(position);
+
+            if (piece == null)
+                throw new ArgumentException(
+                    $"There's no piece to kill at {position}"
+                );
+            
             pieces.Remove(piece);
+            
             piece.gameObject.SetActive(false);
+            Destroy(piece);
         }
     }
 }

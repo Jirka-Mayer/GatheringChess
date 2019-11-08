@@ -4,6 +4,7 @@ using System.Linq;
 using LightJson;
 using Unisave.Serialization;
 using UnityEngine;
+using Object = System.Object;
 
 namespace GatheringChess
 {
@@ -63,7 +64,12 @@ namespace GatheringChess
         
         public static bool operator ==(PieceId a, PieceId b)
         {
-            return a?.Equals(b) ?? false;
+            // null == null T  ;  null == val F
+            if (ReferenceEquals(a, null))
+                return ReferenceEquals(b, null);
+            
+            // val == null F  ;  val == val CMP
+            return a.Equals(b);
         }
 
         public static bool operator !=(PieceId a, PieceId b)
@@ -73,7 +79,7 @@ namespace GatheringChess
 
         public bool Equals(PieceId other)
         {
-            if (other == null)
+            if (ReferenceEquals(other, null))
                 return false;
             
             return type == other.type

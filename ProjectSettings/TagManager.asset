@@ -41,6 +41,9 @@ TagManager:
   - name: Tiles
     uniqueID: 2773192249
     locked: 0
+  - name: Highlights
+    uniqueID: 2126297685
+    locked: 0
   - name: Pieces
     uniqueID: 1959514985
     locked: 0
